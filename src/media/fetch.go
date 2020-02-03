@@ -25,6 +25,7 @@ type ResponseData struct {
 	Id string
 }
 
+// TODO: Use something better than this. It's too tedious to map
 var fetchResponseTmpl = template.Must(template.ParseFiles("templates/media/response.html"))
 var fetchIndexTmpl = template.Must(template.ParseFiles("templates/media/index.html"))
 
@@ -59,14 +60,19 @@ func FetchMedia(w http.ResponseWriter, r *http.Request) {
 
 // returns the ID of the file
 func fetch(url string) (string, error) {
-	// This will be the output file name
+	// The id will be used as the name of the parent directory of the output files
 	id := uuid.New().String()
-	// youtube-dl will add the extension as needed
-	name := getFilenameWithoutExtensionById(id)
+	name := getMediaDirectory(id) + "%(title)s.%(ext)s"
 
 	log.Info().Msgf("Downloading %s to %s", url, id)
 
-	cmd := exec.Command("youtube-dl", "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4/", "-o", name, url)
+	cmd := exec.Command("youtube-dl",
+		"--format", "bestvideo+bestaudio[ext=m4a]/bestvideo+bestaudio/best",
+		"--merge-output-format", "mp4",
+		"--restrict-filenames",
+		"--write-info-json",
+		"--output", name,
+		url)
 
 	var stdoutBuf, stderrBuf bytes.Buffer
 	stdoutIn, _ := cmd.StdoutPipe()
@@ -105,13 +111,6 @@ func fetch(url string) (string, error) {
 	}
 
 	return id, nil
-}
-
-// Returns the relative filename without the extension. Example:
-// downloads/b541cc43-9833-4146-ab19-71334484c0c1/media
-// where media can be media.mp4
-func getFilenameWithoutExtensionById(id string) string {
-	return getMediaDirectory(id) + "media"
 }
 
 // Returns the relative directory containing the media file, with a trailing slash

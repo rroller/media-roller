@@ -3,6 +3,8 @@ package media
 import (
 	"github.com/rs/zerolog/log"
 	"net/http"
+	"path/filepath"
+	"strings"
 )
 
 /**
@@ -47,12 +49,20 @@ func getFileFromId(id string) (string, error) {
 	files, _ := file.Readdirnames(0) // 0 to read all files and folders
 	if len(files) == 0 {
 		return "", errors.New("ID not found")
-	} else if len(files) > 1 {
-		// We should only have 1 media file produced
+	} else if len(files) > 2 {
+		// We should only have 2 media file produced, the mp4 and the json file
 		return "", errors.New("internal error")
 	}
 
-	return root + files[0], nil
+	// We expect two files to be produced, a json manifest and an mp4. We want to return the mp4
+	// Sometimes the video file might not have an mp4 extension, so filter out the json file
+	for _, f := range files {
+		if !strings.HasSuffix(f, ".json") {
+			return root + f, nil
+		}
+	}
+
+	return "", errors.New("unable to find file")
 }
 
 func streamFileToClient(writer http.ResponseWriter, filename string) {
@@ -83,8 +93,7 @@ func streamFileToClient(writer http.ResponseWriter, filename string) {
 	fileSize := strconv.FormatInt(fileStat.Size(), 10)
 
 	// Send the headers
-	// Set the following if you want to force the client to download the file
-	// writer.Header().Set("Content-Disposition", "attachment; filename="+filepath.Base(filename))
+	writer.Header().Set("Content-Disposition", "filename="+filepath.Base(filename))
 	writer.Header().Set("Content-Type", fileContentType)
 	writer.Header().Set("Content-Length", fileSize)
 
