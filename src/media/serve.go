@@ -2,22 +2,16 @@ package media
 
 import (
 	"github.com/rs/zerolog/log"
+	"io"
 	"net/http"
+	"os"
 	"path/filepath"
-	"strings"
+	"strconv"
 )
 
 /**
 This will serve the fetched files to the client
 */
-
-import (
-	"errors"
-	"github.com/google/uuid"
-	"io"
-	"os"
-	"strconv"
-)
 
 func ServeMedia(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
@@ -25,7 +19,7 @@ func ServeMedia(w http.ResponseWriter, r *http.Request) {
 	if id == "" {
 		http.Error(w, "Missing file ID", http.StatusBadRequest)
 		return
-	} else if _, err := uuid.Parse(id); err != nil {
+	} else if !isValidId(id) {
 		// Try to parse it just to avoid any type of directory traversal attacks
 		http.Error(w, "Invalid file ID", http.StatusBadRequest)
 		return
@@ -37,32 +31,6 @@ func ServeMedia(w http.ResponseWriter, r *http.Request) {
 	}
 
 	streamFileToClient(w, filename)
-}
-
-// id is expected to be validated prior to calling this func
-func getFileFromId(id string) (string, error) {
-	root := getMediaDirectory(id)
-	file, err := os.Open(root)
-	if err != nil {
-		return "", err
-	}
-	files, _ := file.Readdirnames(0) // 0 to read all files and folders
-	if len(files) == 0 {
-		return "", errors.New("ID not found")
-	} else if len(files) > 2 {
-		// We should only have 2 media file produced, the mp4 and the json file
-		return "", errors.New("internal error")
-	}
-
-	// We expect two files to be produced, a json manifest and an mp4. We want to return the mp4
-	// Sometimes the video file might not have an mp4 extension, so filter out the json file
-	for _, f := range files {
-		if !strings.HasSuffix(f, ".json") {
-			return root + f, nil
-		}
-	}
-
-	return "", errors.New("unable to find file")
 }
 
 func streamFileToClient(writer http.ResponseWriter, filename string) {

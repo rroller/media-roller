@@ -1,5 +1,31 @@
-<html lang="">
-<head></head>
-<h1>Download media file</h1>
-<a href="download?id={{.Id}}">download</a>
+<!doctype html>
+<html lang="en">
+<head>
+    <title>media-roller</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<body style="background-color: #43464a">
+<div class="container d-flex flex-column text-light text-center">
+    <div class="flex-grow-1"></div>
+    <div class="jumbotron bg-transparent flex-grow-1">
+        <h1 class="display-4"><a class="text-light" href="/media">media roller</a></h1>
+        <p>
+            Mobile friendly tool for downloading videos from social media
+        </p>
+        <div>
+            <h2>Done!</h2>
+            {{range .Medias}}
+                <a style="color: dodgerblue" href="download?id={{.Id}}">{{.Name}}</a> <small>{{.HumanSize}}</small>
+            {{ end }}
+        </div>
+    </div>
+    <footer>
+        <div>
+            <p class="text-muted">Source at <a class="text-light" href="https://github.com/rroller/media-roller">https://github.com/rroller/media-roller</a>
+            </p>
+        </div>
+    </footer>
+</div>
+</body>
 </html>

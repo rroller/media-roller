@@ -1,8 +1,14 @@
 package media
 
 import (
+	"crypto/md5"
+	"errors"
+	"fmt"
+	"github.com/dustin/go-humanize"
 	"html/template"
 	"net/http"
+	"path/filepath"
+	"strings"
 )
 
 /**
@@ -11,7 +17,6 @@ This file will download the media from a URL and save it to disk.
 
 import (
 	"bytes"
-	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"io"
 	"os"
@@ -21,8 +26,15 @@ import (
 
 const downloadDir = "downloads/"
 
-type ResponseData struct {
-	Id string
+type Media struct {
+	Id          string
+	Name        string
+	SizeInBytes int64
+	HumanSize   string
+}
+
+type MediaResults struct {
+	Medias []Media
 }
 
 // TODO: Use something better than this. It's too tedious to map
@@ -43,16 +55,32 @@ func FetchMedia(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := fetch(url)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	// NOTE: This system is for a simple use case, meant to run at home. This is not a great design for a robust system.
+	// We are hashing the URL here and writing files to disk to a consistent directory based on the ID. You can imagine
+	// concurrent users would break this for the same URL. That's fine given this is for a simple home system.
+	// Future work can make this more sophisticated.
+	id := GetMD5Hash(url)
+	// Look to see if we already have the media on disk
+	medias, err := getAllFilesForId(id)
+	if len(medias) == 0 {
+		// We don't, so go fetch it
+		id, err = fetch(url)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		medias, err = getAllFilesForId(id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 	}
 
-	data := ResponseData{
-		Id: id,
+	response := MediaResults{
+		Medias: medias,
 	}
-	if err := fetchResponseTmpl.Execute(w, data); err != nil {
+
+	if err := fetchResponseTmpl.Execute(w, response); err != nil {
 		log.Error().Msgf("Error rendering template: %v", err)
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 	}
@@ -61,7 +89,7 @@ func FetchMedia(w http.ResponseWriter, r *http.Request) {
 // returns the ID of the file
 func fetch(url string) (string, error) {
 	// The id will be used as the name of the parent directory of the output files
-	id := uuid.New().String()
+	id := GetMD5Hash(url)
 	name := getMediaDirectory(id) + "%(title)s.%(ext)s"
 
 	log.Info().Msgf("Downloading %s to %s", url, id)
@@ -117,4 +145,74 @@ func fetch(url string) (string, error) {
 // Id is expected to be pre validated
 func getMediaDirectory(id string) string {
 	return downloadDir + id + "/"
+}
+
+// id is expected to be validated prior to calling this func
+func getAllFilesForId(id string) ([]Media, error) {
+	root := getMediaDirectory(id)
+	file, err := os.Open(root)
+	if err != nil {
+		return nil, err
+	}
+	files, _ := file.Readdirnames(0) // 0 to read all files and folders
+	if len(files) == 0 {
+		return nil, errors.New("ID not found")
+	}
+
+	var medias []Media
+
+	// We expect two files to be produced for each video, a json manifest and an mp4.
+	for _, f := range files {
+		if !strings.HasSuffix(f, ".json") {
+			fi, err := os.Stat(root + f)
+			var size int64 = 0
+			if err == nil {
+				size = fi.Size()
+			}
+
+			media := Media{
+				Id:          id,
+				Name:        filepath.Base(f),
+				SizeInBytes: size,
+				HumanSize:   humanize.Bytes(uint64(size)),
+			}
+			medias = append(medias, media)
+		}
+	}
+
+	return medias, nil
+}
+
+// id is expected to be validated prior to calling this func
+// TODO: This needs to handle multiple files in the directory
+func getFileFromId(id string) (string, error) {
+	root := getMediaDirectory(id)
+	file, err := os.Open(root)
+	if err != nil {
+		return "", err
+	}
+	files, _ := file.Readdirnames(0) // 0 to read all files and folders
+	if len(files) == 0 {
+		return "", errors.New("ID not found")
+	}
+
+	// We expect two files to be produced, a json manifest and an mp4. We want to return the mp4
+	// Sometimes the video file might not have an mp4 extension, so filter out the json file
+	for _, f := range files {
+		if !strings.HasSuffix(f, ".json") {
+			// TODO: This is just returning the first file found. We need to handle multiple
+			return root + f, nil
+		}
+	}
+
+	return "", errors.New("unable to find file")
+}
+
+func GetMD5Hash(url string) string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(url)))
+}
+
+func isValidId(id string) bool {
+	// TODO: Finish this
+	return true
 }

@@ -1,7 +1,36 @@
-<html lang="">
-<head><title>media-roller</title></head>
-<h1>Download media file</h1>
-<form action="media/fetch">
-    <input type="text" name="url"><input type="submit" value="Fetch"/>
-</form>
+<!doctype html>
+<html lang="en">
+<head>
+    <title>media-roller</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<body style="background-color: #43464a">
+<div class="container d-flex flex-column text-light text-center">
+    <div class="flex-grow-1"></div>
+    <div class="jumbotron bg-transparent flex-grow-1">
+        <h1 class="display-4"><a class="text-light" href="/media">media roller</a></h1>
+        <p>
+            Mobile friendly tool for downloading videos from social media
+        </p>
+        <div>
+            <form action="media/fetch" method="GET">
+                <div class="input-group">
+                    <input name="url" type="url" class="form-control" placeholder="URL" aria-label="URL"
+                           aria-describedby="button-submit" autofocus>
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit" id="button-submit">Submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <footer>
+        <div>
+            <p class="text-muted">Source at <a class="text-light" href="https://github.com/rroller/media-roller">https://github.com/rroller/media-roller</a>
+            </p>
+        </div>
+    </footer>
+</div>
+</body>
 </html>
