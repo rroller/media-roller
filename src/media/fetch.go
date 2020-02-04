@@ -221,7 +221,7 @@ func isValidId(id string) bool {
 }
 
 func getDownloadDir() string {
-	dir := os.Getenv("DOWNLOAD_DIR")
+	dir := os.Getenv("MR_DOWNLOAD_DIR")
 	if dir != "" {
 		if !strings.HasSuffix(dir, "/") {
 			return dir + "/"
