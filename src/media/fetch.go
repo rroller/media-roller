@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -24,8 +25,6 @@ import (
 	"sync"
 )
 
-const downloadDir = "downloads/"
-
 type Media struct {
 	Id          string
 	Name        string
@@ -40,6 +39,10 @@ type MediaResults struct {
 // TODO: Use something better than this. It's too tedious to map
 var fetchResponseTmpl = template.Must(template.ParseFiles("templates/media/response.html"))
 var fetchIndexTmpl = template.Must(template.ParseFiles("templates/media/index.html"))
+
+// Where the media files are saved. Always has a trailing slash
+var downloadDir = getDownloadDir()
+var idCharSet = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString
 
 func Index(w http.ResponseWriter, _ *http.Request) {
 	if err := fetchIndexTmpl.Execute(w, nil); err != nil {
@@ -213,6 +216,17 @@ func GetMD5Hash(url string) string {
 }
 
 func isValidId(id string) bool {
-	// TODO: Finish this
-	return true
+	// TODO: Finish this. Should only be alpha numeric
+	return idCharSet(id)
+}
+
+func getDownloadDir() string {
+	dir := os.Getenv("DOWNLOAD_DIR")
+	if dir != "" {
+		if !strings.HasSuffix(dir, "/") {
+			return dir + "/"
+		}
+		return dir
+	}
+	return "downloads/"
 }
