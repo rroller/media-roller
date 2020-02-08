@@ -25,6 +25,10 @@ func ServeMedia(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	streamFileToClientById(w, id)
+}
+
+func streamFileToClientById(w http.ResponseWriter, id string) {
 	filename, err := getFileFromId(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

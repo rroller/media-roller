@@ -52,10 +52,37 @@ func Index(w http.ResponseWriter, _ *http.Request) {
 }
 
 func FetchMedia(w http.ResponseWriter, r *http.Request) {
+	response, err := getMediaResults(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := fetchResponseTmpl.Execute(w, response); err != nil {
+		log.Error().Msgf("Error rendering template: %v", err)
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+	}
+}
+
+func FetchMediaApi(w http.ResponseWriter, r *http.Request) {
+	response, err := getMediaResults(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if len(response.Medias) == 0 {
+		http.Error(w, "Media not found", http.StatusBadRequest)
+		return
+	}
+
+	// just take the first one
+	streamFileToClientById(w, response.Medias[0].Id)
+}
+
+func getMediaResults(r *http.Request) (MediaResults, error) {
 	url := r.URL.Query().Get("url")
 	if url == "" {
-		http.Error(w, "Missing URL", http.StatusBadRequest)
-		return
+		return MediaResults{}, errors.New("Missing URL")
 	}
 
 	// NOTE: This system is for a simple use case, meant to run at home. This is not a great design for a robust system.
@@ -67,30 +94,23 @@ func FetchMedia(w http.ResponseWriter, r *http.Request) {
 	medias, err := getAllFilesForId(id)
 	if len(medias) == 0 {
 		// We don't, so go fetch it
-		id, err = fetch(url)
+		id, err = downloadMedia(url)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			return MediaResults{}, err
 		}
 		medias, err = getAllFilesForId(id)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			return MediaResults{}, err
 		}
 	}
 
-	response := MediaResults{
+	return MediaResults{
 		Medias: medias,
-	}
-
-	if err := fetchResponseTmpl.Execute(w, response); err != nil {
-		log.Error().Msgf("Error rendering template: %v", err)
-		http.Error(w, "Internal error", http.StatusInternalServerError)
-	}
+	}, nil
 }
 
 // returns the ID of the file
-func fetch(url string) (string, error) {
+func downloadMedia(url string) (string, error) {
 	// The id will be used as the name of the parent directory of the output files
 	id := GetMD5Hash(url)
 	name := getMediaDirectory(id) + "%(title)s.%(ext)s"
@@ -144,7 +164,7 @@ func fetch(url string) (string, error) {
 	return id, nil
 }
 
-// Returns the relative directory containing the media file, with a trailing slash
+// Returns the relative directory containing the media file, with a trailing slash.
 // Id is expected to be pre validated
 func getMediaDirectory(id string) string {
 	return downloadDir + id + "/"
