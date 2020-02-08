@@ -85,6 +85,8 @@ RUN go build -x -o media-roller ./src
 # youtube-dl needs python
 FROM python:3.8.1-alpine3.11
 
+# This is where the downloaded files will be saved in the container.
+ENV MR_DOWNLOAD_DIR="/download"
 ENV PATH=/opt/ffmpeg/bin:$PATH
 
 RUN apk add --update --no-cache \
@@ -108,6 +110,7 @@ COPY --from=builder /app/media-roller /app/media-roller
 COPY --from=builder /opt/ffmpeg /opt/ffmpeg
 COPY --from=builder /usr/lib/libfdk-aac.so.2 /usr/lib/libfdk-aac.so.2
 COPY templates /app/templates
+COPY static /app/static
 
 WORKDIR /app
 

@@ -1,0 +1,25 @@
+# Media Roller
+A mobile friendly tool for downloading videos from social media.
+The backend is is a Golang server that will take a URL (YouTube, Reddit, Twitter, etc),
+download the video file, and return a URL to download the video. The video will be transcoced as needed to produce a single mp4 file.
+
+![GitHub Logo](static/images/screenshot1.png)
+
+![GitHub Logo](static/images/screenshot2.png)
+
+
+# Running
+Pull the repo then run
+```bash
+./run.sh
+```
+
+With Docker: `ronnieroller/media-roller:latest`.
+See https://hub.docker.com/repository/docker/ronnieroller/media-roller
+The files will be saved to the /download directory which you can mount as needed.
+
+
+With Unraid: TODO: This works with Unraid, I'm working on a template and will publish it soon.
+
+# Integrating with mobile
+I'm working on an iOS shortcut will download the video to the camera roll for a supplied URL.
