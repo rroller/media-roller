@@ -216,7 +216,6 @@ func GetMD5Hash(url string) string {
 }
 
 func isValidId(id string) bool {
-	// TODO: Finish this. Should only be alpha numeric
 	return idCharSet(id)
 }
 

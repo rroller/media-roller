@@ -15,10 +15,7 @@ import (
 func main() {
 	// Setup routes
 	r := chi.NewRouter()
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte("<a href='/media'>media roller</a>"))
-	})
-	r.Route("/media", func(r chi.Router) {
+	r.Route("/", func(r chi.Router) {
 		r.Get("/", media.Index)
 		r.Get("/fetch", media.FetchMedia)
 		r.Get("/download", media.ServeMedia)
