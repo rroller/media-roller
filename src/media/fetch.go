@@ -76,7 +76,7 @@ func FetchMediaApi(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// just take the first one
-	streamFileToClientById(w, response.Medias[0].Id)
+	streamFileToClientById(w, r, response.Medias[0].Id)
 }
 
 func getMediaResults(r *http.Request) (MediaResults, error) {
