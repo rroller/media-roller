@@ -35,4 +35,5 @@ After you you have you server up, install this shortcut. Update the endpoint to 
 
 https://www.icloud.com/shortcuts/2b9765fb5bf24509a4e83bc76c5c7409
 
-
+# Unraid
+media-roller is available in Unraid and can be found on the "Apps" tab by searching its name.
