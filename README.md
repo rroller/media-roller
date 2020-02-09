@@ -5,9 +5,9 @@ download the video file, and return a URL to directly download the video. The vi
 
 Note: This was written to run on a home network and wasn't originally written to be exposed to public traffic. Currently there's no auth. This might change and feel free to send a pull request, but right now, keep this on your internal network and do not expose it.
 
-https://i.imgur.com/lxwf1qU.png
+![Screenshot 1](https://i.imgur.com/lxwf1qU.png)
 
-https://i.imgur.com/TWAtM7k.png
+![Screenshot 2](https://i.imgur.com/TWAtM7k.png)
 
 
 # Running
