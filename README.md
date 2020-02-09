@@ -31,4 +31,8 @@ To download a video directly, use the API endpoint:
 ```
 
 # Integrating with mobile
-I'm working on an iOS shortcut will download the video to the camera roll for a supplied URL.
+After you you have you server up, install this shortcut. Update the endpoint to your server address by editing the shortcut before running it. 
+
+https://www.icloud.com/shortcuts/2b9765fb5bf24509a4e83bc76c5c7409
+
+
