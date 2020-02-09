@@ -78,9 +78,5 @@ func streamFileToClient(writer http.ResponseWriter, filename string) {
 	}
 
 	// Copy the file to the client
-	if _, err = io.Copy(writer, Openfile); err != nil {
-		log.Error().Msgf("Error copying file %s %v", filename, err)
-		http.Error(writer, "Couldn't copy file", 404)
-		return
-	}
+	_, _ = io.Copy(writer, Openfile)
 }

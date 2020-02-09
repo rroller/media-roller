@@ -118,10 +118,11 @@ func downloadMedia(url string) (string, error) {
 	log.Info().Msgf("Downloading %s to %s", url, id)
 
 	cmd := exec.Command("youtube-dl",
-		"--format", "bestvideo+bestaudio[ext=m4a]/bestvideo+bestaudio/best",
+		"--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
 		"--merge-output-format", "mp4",
 		"--restrict-filenames",
 		"--write-info-json",
+		"--verbose",
 		"--output", name,
 		url)
 
