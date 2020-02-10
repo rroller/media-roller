@@ -34,3 +34,9 @@ https://www.icloud.com/shortcuts/2b9765fb5bf24509a4e83bc76c5c7409
 
 # Unraid
 media-roller is available in Unraid and can be found on the "Apps" tab by searching its name.
+
+# Open Issues, missing features
+* Conversions are slow, need to be sped up
+* Needs to support auth
+* Needs a better way to track downloaded media and manage it
+* Add ablity to prefer certain quality or format
