@@ -18,10 +18,7 @@ Pull the repo then run
 
 With Docker: `ronnieroller/media-roller:latest`.
 See https://hub.docker.com/repository/docker/ronnieroller/media-roller
-The files will be saved to the /download directory which you can mount as needed.
-
-
-With Unraid: TODO: This works with Unraid, I'm working on a template and will publish it soon.
+The files are saved to the /download directory which you can mount as needed.
 
 # API
 To download a video directly, use the API endpoint:
