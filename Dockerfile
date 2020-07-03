@@ -3,18 +3,19 @@ FROM golang:1.13.6-alpine3.11 as builder
 RUN apk add --no-cache curl
 
 # ffmpeg source - https://github.com/alfg/docker-ffmpeg
-ARG FFMPEG_VERSION=4.2.2
+ARG FFMPEG_VERSION=4.3
 ARG PREFIX=/opt/ffmpeg
 ARG LD_LIBRARY_PATH=/opt/ffmpeg/lib
 ARG MAKEFLAGS="-j4"
 
 # FFmpeg build dependencies.
-RUN apk add --update \
+RUN apk update && apk add --update \
   build-base \
   coreutils \
   freetype-dev \
   gcc \
   lame-dev \
+  openssl-dev \
   libogg-dev \
   libass \
   libass-dev \
@@ -31,8 +32,8 @@ RUN apk add --update \
   x265-dev \
   yasm
 
-# Get fdk-aac from testing.
-RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories && \
+# Get fdk-aac from community.
+RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories && \
   apk add --update fdk-aac-dev
 
 # Get ffmpeg source.
@@ -48,6 +49,7 @@ RUN cd /tmp/ffmpeg-${FFMPEG_VERSION} && \
   --enable-nonfree \
   --enable-small \
   --enable-libmp3lame \
+  --enable-openssl \
   --enable-libx264 \
   --enable-libx265 \
   --enable-libvpx \
