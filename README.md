@@ -29,6 +29,12 @@ To download a video directly, use the API endpoint:
 /api/download?url=SOME_URL
 ```
 
+Create a bookmarklet, allowing one click downloads (From a PC):
+
+```
+javascript:(location.href="http://127.0.0.1:3000/fetch?url="+encodeURIComponent(location.href));
+```
+
 # Integrating with mobile
 After you you have you server up, install this shortcut. Update the endpoint to your server address by editing the shortcut before running it. 
 
