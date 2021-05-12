@@ -3,7 +3,7 @@ FROM golang:1.13.6-alpine3.11 as builder
 RUN apk add --no-cache curl
 
 # ffmpeg source - https://github.com/alfg/docker-ffmpeg
-ARG FFMPEG_VERSION=4.3.1
+ARG FFMPEG_VERSION=4.4
 ARG PREFIX=/opt/ffmpeg
 ARG LD_LIBRARY_PATH=/opt/ffmpeg/lib
 ARG MAKEFLAGS="-j4"
