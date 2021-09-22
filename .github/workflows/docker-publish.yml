@@ -8,8 +8,6 @@ name: Docker
 on:
   push:
     branches: [ master ]
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
 
 #env:
   # Use docker.io for Docker Hub if empty
@@ -55,5 +53,5 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ronnieroller/media-roller:latest
           labels: ${{ steps.meta.outputs.labels }}
