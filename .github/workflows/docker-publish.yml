@@ -8,7 +8,6 @@ name: Docker
 on:
   push:
     branches: [ master ]
-    tags: [ 'v*.*.*' ]
 
 #env:
   # Use docker.io for Docker Hub if empty
@@ -56,5 +55,5 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.docker_meta.outputs.tags }}
+          tags: ronnieroller/media-roller:latest
           labels: ${{ steps.meta.outputs.labels }}
