@@ -38,7 +38,7 @@ javascript:(location.href="http://127.0.0.1:3000/fetch?url="+encodeURIComponent(
 # Integrating with mobile
 After you you have you server up, install this shortcut. Update the endpoint to your server address by editing the shortcut before running it. 
 
-https://www.icloud.com/shortcuts/2b9765fb5bf24509a4e83bc76c5c7409
+https://www.icloud.com/shortcuts/d3b05b78eb434496ab28dd91e1c79615
 
 # Unraid
 media-roller is available in Unraid and can be found on the "Apps" tab by searching its name.
