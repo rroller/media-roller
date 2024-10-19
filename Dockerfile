@@ -35,6 +35,8 @@ RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/download/2024.10.07/yt-dlp
     echo "8d8151368376c4d2f6dd6993d893be09334c06b7e6fa1e7e07bc3c4fbef848b3 /usr/local/bin/yt-dlp" | sha256sum -c - && \
     chmod a+rx /usr/local/bin/yt-dlp
 
+RUN yt-dlp --update --update-to nightly
+
 # Sanity check
 RUN yt-dlp --version && \
     ffmpeg -version
