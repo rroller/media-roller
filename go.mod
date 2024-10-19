@@ -1,11 +1,15 @@
 module media-roller
 
-go 1.13
+go 1.23
 
 require (
-	github.com/dustin/go-humanize v1.0.0
-	github.com/go-chi/chi v4.0.3+incompatible
-	github.com/go-chi/valve v0.0.0-20170920024740-9e45288364f4
-	github.com/google/uuid v1.1.1
-	github.com/rs/zerolog v1.17.2
+	github.com/dustin/go-humanize v1.0.1
+	github.com/go-chi/chi/v5 v5.1.0
+	github.com/rs/zerolog v1.33.0
+)
+
+require (
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.19 // indirect
+	golang.org/x/sys v0.12.0 // indirect
 )

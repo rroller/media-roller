@@ -1,2 +1,4 @@
 .idea/
-downloads/
+download/
+.DS_Store
+media-roller
