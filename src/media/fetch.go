@@ -32,7 +32,7 @@ type Media struct {
 	HumanSize   string
 }
 
-type MediaResults struct {
+type Results struct {
 	Medias []Media
 }
 
@@ -79,10 +79,10 @@ func FetchMediaApi(w http.ResponseWriter, r *http.Request) {
 	streamFileToClientById(w, r, response.Medias[0].Id)
 }
 
-func getMediaResults(r *http.Request) (MediaResults, error) {
+func getMediaResults(r *http.Request) (Results, error) {
 	url := r.URL.Query().Get("url")
 	if url == "" {
-		return MediaResults{}, errors.New("Missing URL")
+		return Results{}, errors.New("Missing URL")
 	}
 
 	// NOTE: This system is for a simple use case, meant to run at home. This is not a great design for a robust system.
@@ -96,15 +96,15 @@ func getMediaResults(r *http.Request) (MediaResults, error) {
 		// We don't, so go fetch it
 		id, err = downloadMedia(url)
 		if err != nil {
-			return MediaResults{}, err
+			return Results{}, err
 		}
 		medias, err = getAllFilesForId(id)
 		if err != nil {
-			return MediaResults{}, err
+			return Results{}, err
 		}
 	}
 
-	return MediaResults{
+	return Results{
 		Medias: medias,
 	}, nil
 }

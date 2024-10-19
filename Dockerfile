@@ -19,17 +19,21 @@ FROM python:3.13.0-alpine3.20
 ENV MR_DOWNLOAD_DIR="/download"
 
 RUN apk add --update --no-cache \
-  curl
+    curl
 
-COPY --from=builder /app/media-roller /app/media-roller
+# https://hub.docker.com/r/mwader/static-ffmpeg/tags
+# https://github.com/wader/static-ffmpeg
 COPY --from=mwader/static-ffmpeg:7.1 /ffmpeg /usr/local/bin/
+COPY --from=builder /app/media-roller /app/media-roller
 COPY templates /app/templates
 COPY static /app/static
 
 WORKDIR /app
 
-RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp && \
-   chmod a+rx /usr/local/bin/yt-dlp
+# Get new releases here https://github.com/yt-dlp/yt-dlp/releases
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/download/2024.10.07/yt-dlp -o /usr/local/bin/yt-dlp && \
+    echo "8d8151368376c4d2f6dd6993d893be09334c06b7e6fa1e7e07bc3c4fbef848b3 /usr/local/bin/yt-dlp" | sha256sum -c - && \
+    chmod a+rx /usr/local/bin/yt-dlp
 
 # Sanity check
 RUN yt-dlp --version && \

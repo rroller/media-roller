@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog/log"
 	"media-roller/src/media"
@@ -53,7 +54,7 @@ func main() {
 
 		go func() {
 			<-shutdownCtx.Done()
-			if shutdownCtx.Err() == context.DeadlineExceeded {
+			if errors.Is(shutdownCtx.Err(), context.DeadlineExceeded) {
 				log.Fatal().Msg("graceful shutdown timed out.. forcing exit.")
 			}
 		}()
@@ -68,7 +69,7 @@ func main() {
 
 	// Run the server
 	err := server.ListenAndServe()
-	if err != nil && err != http.ErrServerClosed {
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal().Err(err)
 	}
 
