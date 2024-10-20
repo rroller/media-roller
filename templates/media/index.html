@@ -3,8 +3,7 @@
 <head>
     <title>media-roller</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/static/css//bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
 </head>
 <body>
@@ -19,12 +18,24 @@
             <form action="/fetch" method="GET">
                 <div class="input-group">
                     <input name="url" type="url" class="form-control" placeholder="URL" aria-label="URL"
-                           aria-describedby="button-submit" autofocus>
+                           aria-describedby="button-submit" value="{{.Url}}" autofocus>
                     <div class="input-group-append">
                         <button class="btn btn-primary" type="submit" id="button-submit">Submit</button>
                     </div>
                 </div>
             </form>
+            {{ if .Medias }}
+            <div style="margin-top:20px;">
+                <h2>Done!</h2>
+                {{range .Medias}}
+                <a style="color: dodgerblue" href="/download?id={{.Id}}">{{.Name}}</a> <small>{{.HumanSize}}</small>
+                {{ end }}
+            </div>
+            {{ end }}
+            {{ if .ErrorMessage }}
+            <h4 style="margin-top:20px;">Error</h4>
+            <pre style="background-color:white;text-align:left;white-space: pre-wrap;">{{ .ErrorMessage }}</pre>
+            {{ end }}
         </div>
     </div>
     <footer>

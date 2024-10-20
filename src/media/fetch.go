@@ -33,11 +33,11 @@ type Media struct {
 }
 
 type Results struct {
-	Medias []Media
+	Medias       []Media
+	Url          string
+	ErrorMessage string
 }
 
-// TODO: Use something better than this. It's too tedious to map
-var fetchResponseTmpl = template.Must(template.ParseFiles("templates/media/response.html"))
 var fetchIndexTmpl = template.Must(template.ParseFiles("templates/media/index.html"))
 
 // Where the media files are saved. Always has a trailing slash
@@ -57,11 +57,11 @@ func Index(w http.ResponseWriter, _ *http.Request) {
 func FetchMedia(w http.ResponseWriter, r *http.Request) {
 	response, err := getMediaResults(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		_ = fetchIndexTmpl.Execute(w, response)
 		return
 	}
 
-	if err := fetchResponseTmpl.Execute(w, response); err != nil {
+	if err := fetchIndexTmpl.Execute(w, response); err != nil {
 		log.Error().Msgf("Error rendering template: %v", err)
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 	}
@@ -85,7 +85,7 @@ func FetchMediaApi(w http.ResponseWriter, r *http.Request) {
 func getMediaResults(r *http.Request) (Results, error) {
 	url := r.URL.Query().Get("url")
 	if url == "" {
-		return Results{}, errors.New("Missing URL")
+		return Results{ErrorMessage: "Missing URL"}, errors.New("missing URL")
 	}
 
 	// NOTE: This system is for a simple use case, meant to run at home. This is not a great design for a robust system.
@@ -95,25 +95,28 @@ func getMediaResults(r *http.Request) (Results, error) {
 	id := GetMD5Hash(url)
 	// Look to see if we already have the media on disk
 	medias, err := getAllFilesForId(id)
+	result := Results{Url: url}
 	if len(medias) == 0 {
 		// We don't, so go fetch it
-		id, err = downloadMedia(url)
+		errMessage := ""
+		id, errMessage, err = downloadMedia(url)
 		if err != nil {
-			return Results{}, err
+			result.ErrorMessage = errMessage
+			return result, err
 		}
 		medias, err = getAllFilesForId(id)
 		if err != nil {
-			return Results{}, err
+			result.ErrorMessage = err.Error()
+			return result, err
 		}
 	}
 
-	return Results{
-		Medias: medias,
-	}, nil
+	result.Medias = medias
+	return result, nil
 }
 
-// returns the ID of the file
-func downloadMedia(url string) (string, error) {
+// returns the ID of the file, and error message, and an error
+func downloadMedia(url string) (string, string, error) {
 	// The id will be used as the name of the parent directory of the output files
 	id := GetMD5Hash(url)
 	name := getMediaDirectory(id) + "%(id)s.%(ext)s"
@@ -140,7 +143,7 @@ func downloadMedia(url string) (string, error) {
 	err := cmd.Start()
 	if err != nil {
 		log.Error().Msgf("Error starting command: %v", err)
-		return "", err
+		return "", err.Error(), err
 	}
 
 	var wg sync.WaitGroup
@@ -157,15 +160,15 @@ func downloadMedia(url string) (string, error) {
 
 	err = cmd.Wait()
 	if err != nil {
-		log.Error().Msgf("cmd.Run() failed with %s", err)
-		return "", err
+		log.Error().Err(err).Msgf("cmd.Run() failed with %s", err)
+		return "", strings.TrimSpace(stderrBuf.String()), err
 	} else if errStdout != nil {
 		log.Error().Msgf("failed to capture stdout: %v", errStdout)
 	} else if errStderr != nil {
 		log.Error().Msgf("failed to capture stderr: %v", errStderr)
 	}
 
-	return id, nil
+	return id, "", nil
 }
 
 // Returns the relative directory containing the media file, with a trailing slash.
