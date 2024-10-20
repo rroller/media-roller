@@ -46,7 +46,7 @@ var idCharSet = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString
 
 func Index(w http.ResponseWriter, _ *http.Request) {
 	data := map[string]string{
-		"ytDlpVersion": GetInstalledVersion(),
+		"ytDlpVersion": CachedYtDlpVersion,
 	}
 	if err := fetchIndexTmpl.Execute(w, data); err != nil {
 		log.Error().Msgf("Error rendering template: %v", err)

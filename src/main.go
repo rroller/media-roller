@@ -37,6 +37,7 @@ func main() {
 		log.Panic().Msgf("%s\n", err.Error())
 	}
 
+	media.GetInstalledVersion()
 	go startYtDlpUpdater()
 
 	// The HTTP Server
@@ -86,14 +87,14 @@ func startYtDlpUpdater() {
 	ticker := time.NewTicker(12 * time.Hour)
 
 	// Do one update now
-	_, _ = media.UpdateYtDlp()
+	_ = media.UpdateYtDlp()
 
 	quit := make(chan struct{})
 	go func() {
 		for {
 			select {
 			case <-ticker.C:
-				_, _ = media.UpdateYtDlp()
+				_ = media.UpdateYtDlp()
 				log.Info().Msgf("yt-dlp version: %s", media.GetInstalledVersion())
 			case <-quit:
 				ticker.Stop()

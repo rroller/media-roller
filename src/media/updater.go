@@ -10,7 +10,9 @@ import (
 	"sync"
 )
 
-func UpdateYtDlp() (string, error) {
+var CachedYtDlpVersion = ""
+
+func UpdateYtDlp() error {
 	log.Info().Msgf("Updateing yt-dlp")
 
 	cmd := exec.Command("yt-dlp",
@@ -29,7 +31,7 @@ func UpdateYtDlp() (string, error) {
 	err := cmd.Start()
 	if err != nil {
 		log.Error().Msgf("Error starting command: %v", err)
-		return "", err
+		return err
 	}
 
 	var wg sync.WaitGroup
@@ -46,15 +48,16 @@ func UpdateYtDlp() (string, error) {
 	err = cmd.Wait()
 	if err != nil {
 		log.Error().Msgf("cmd.Run() failed with %s", err)
-		return "", err
+		return err
 	} else if errStdout != nil {
 		log.Error().Msgf("failed to capture stdout: %v", errStdout)
 	} else if errStderr != nil {
 		log.Error().Msgf("failed to capture stderr: %v", errStderr)
 	}
-	log.Info().Msgf("Done updating yt-dlp")
 
-	return "", nil
+	log.Info().Msgf("Done updating yt-dlp. Version=%s", GetInstalledVersion())
+
+	return nil
 }
 
 func GetInstalledVersion() string {
@@ -69,8 +72,9 @@ func GetInstalledVersion() string {
 	}
 
 	version := strings.TrimSpace(string(s.Bytes()))
-	if version != "" {
-		return version
+	if version == "" {
+		version = "unknown"
 	}
-	return "unknown"
+	CachedYtDlpVersion = version
+	return version
 }
