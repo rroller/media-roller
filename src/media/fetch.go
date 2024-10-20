@@ -45,7 +45,10 @@ var downloadDir = getDownloadDir()
 var idCharSet = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString
 
 func Index(w http.ResponseWriter, _ *http.Request) {
-	if err := fetchIndexTmpl.Execute(w, nil); err != nil {
+	data := map[string]string{
+		"ytDlpVersion": GetInstalledVersion(),
+	}
+	if err := fetchIndexTmpl.Execute(w, data); err != nil {
 		log.Error().Msgf("Error rendering template: %v", err)
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 	}

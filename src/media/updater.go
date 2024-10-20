@@ -65,8 +65,12 @@ func GetInstalledVersion() string {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		return ""
+		log.Error().Err(err).Msgf("Error getting installed version")
 	}
 
-	return strings.TrimSpace(string(s.Bytes()))
+	version := strings.TrimSpace(string(s.Bytes()))
+	if version != "" {
+		return version
+	}
+	return "unknown"
 }
