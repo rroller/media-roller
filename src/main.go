@@ -37,6 +37,8 @@ func main() {
 		log.Panic().Msgf("%s\n", err.Error())
 	}
 
+	go startYtDlpUpdater()
+
 	// The HTTP Server
 	server := &http.Server{Addr: ":3000", Handler: router}
 
@@ -76,6 +78,29 @@ func main() {
 	// Wait for server context to be stopped
 	<-serverCtx.Done()
 	log.Info().Msgf("Shutdown complete")
+}
+
+// startYtDlpUpdater will update the yt-dlp to the latest nightly version ever few hours
+func startYtDlpUpdater() {
+	log.Info().Msgf("yt-dlp version: %s", media.GetInstalledVersion())
+	ticker := time.NewTicker(12 * time.Hour)
+
+	// Do one update now
+	_, _ = media.UpdateYtDlp()
+
+	quit := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				_, _ = media.UpdateYtDlp()
+				log.Info().Msgf("yt-dlp version: %s", media.GetInstalledVersion())
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
 }
 
 func fileServer(r chi.Router, public string, static string) {
