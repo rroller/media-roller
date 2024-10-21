@@ -18,23 +18,23 @@
             <form action="/fetch" method="GET">
                 <div class="input-group">
                     <input name="url" type="url" class="form-control" placeholder="URL" aria-label="URL"
-                           aria-describedby="button-submit" value="{{.Url}}" autofocus>
+                           aria-describedby="button-submit" value="{{.url}}" autofocus>
                     <div class="input-group-append">
                         <button class="btn btn-primary" type="submit" id="button-submit">Submit</button>
                     </div>
                 </div>
             </form>
-            {{ if .Medias }}
+            {{ if .media }}
             <div style="margin-top:20px;">
                 <h2>Done!</h2>
-                {{range .Medias}}
+                {{range .media}}
                 <a style="color: dodgerblue" href="/download?id={{.Id}}">{{.Name}}</a> <small>{{.HumanSize}}</small>
                 {{ end }}
             </div>
             {{ end }}
-            {{ if .ErrorMessage }}
+            {{ if .error }}
             <h4 style="margin-top:20px;">Error</h4>
-            <pre style="background-color:white;text-align:left;white-space: pre-wrap;">{{ .ErrorMessage }}</pre>
+            <pre style="background-color:white;text-align:left;white-space: pre-wrap;">{{ .error }}</pre>
             {{ end }}
         </div>
     </div>

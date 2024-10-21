@@ -32,12 +32,6 @@ type Media struct {
 	HumanSize   string
 }
 
-type Results struct {
-	Medias       []Media
-	Url          string
-	ErrorMessage string
-}
-
 var fetchIndexTmpl = template.Must(template.ParseFiles("templates/media/index.html"))
 
 // Where the media files are saved. Always has a trailing slash
@@ -55,37 +49,49 @@ func Index(w http.ResponseWriter, _ *http.Request) {
 }
 
 func FetchMedia(w http.ResponseWriter, r *http.Request) {
-	response, err := getMediaResults(r)
+	url := getUrl(r)
+
+	media, ytdlpErrorMessage, err := getMediaResults(url)
+	data := map[string]interface{}{
+		"url":          url,
+		"media":        media,
+		"error":        ytdlpErrorMessage,
+		"ytDlpVersion": CachedYtDlpVersion,
+	}
 	if err != nil {
-		_ = fetchIndexTmpl.Execute(w, response)
+		_ = fetchIndexTmpl.Execute(w, data)
 		return
 	}
 
-	if err := fetchIndexTmpl.Execute(w, response); err != nil {
+	if err := fetchIndexTmpl.Execute(w, data); err != nil {
 		log.Error().Msgf("Error rendering template: %v", err)
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 	}
 }
 
 func FetchMediaApi(w http.ResponseWriter, r *http.Request) {
-	response, err := getMediaResults(r)
+	url := getUrl(r)
+	medias, _, err := getMediaResults(url)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	if len(response.Medias) == 0 {
+	if len(medias) == 0 {
 		http.Error(w, "Media not found", http.StatusBadRequest)
 		return
 	}
 
 	// just take the first one
-	streamFileToClientById(w, r, response.Medias[0].Id)
+	streamFileToClientById(w, r, medias[0].Id)
 }
 
-func getMediaResults(r *http.Request) (Results, error) {
-	url := r.URL.Query().Get("url")
+func getUrl(r *http.Request) string {
+	return strings.TrimSpace(r.URL.Query().Get("url"))
+}
+
+func getMediaResults(url string) ([]Media, string, error) {
 	if url == "" {
-		return Results{ErrorMessage: "Missing URL"}, errors.New("missing URL")
+		return nil, "", errors.New("missing URL")
 	}
 
 	// NOTE: This system is for a simple use case, meant to run at home. This is not a great design for a robust system.
@@ -95,24 +101,20 @@ func getMediaResults(r *http.Request) (Results, error) {
 	id := GetMD5Hash(url)
 	// Look to see if we already have the media on disk
 	medias, err := getAllFilesForId(id)
-	result := Results{Url: url}
 	if len(medias) == 0 {
 		// We don't, so go fetch it
 		errMessage := ""
 		id, errMessage, err = downloadMedia(url)
 		if err != nil {
-			result.ErrorMessage = errMessage
-			return result, err
+			return nil, errMessage, err
 		}
 		medias, err = getAllFilesForId(id)
 		if err != nil {
-			result.ErrorMessage = err.Error()
-			return result, err
+			return nil, "", err
 		}
 	}
 
-	result.Medias = medias
-	return result, nil
+	return medias, "", nil
 }
 
 // returns the ID of the file, and error message, and an error
