@@ -121,7 +121,7 @@ func getMediaResults(url string) ([]Media, string, error) {
 func downloadMedia(url string) (string, string, error) {
 	// The id will be used as the name of the parent directory of the output files
 	id := GetMD5Hash(url)
-	name := getMediaDirectory(id) + "%(id)s.%(ext)s"
+	name := getMediaDirectory(id) + "%(title)s.%(ext)s"
 
 	log.Info().Msgf("Downloading %s to %s", url, id)
 
