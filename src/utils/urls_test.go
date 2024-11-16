@@ -10,6 +10,8 @@ func TestNormalizeUrl(t *testing.T) {
 		{url: "example.com", want: "example.com"},
 		{url: "https://example.com", want: "https://example.com"},
 		{url: "https://example.com this is an example", want: "https://example.com"},
+		{url: "https://example.com\nthis is an example", want: "https://example.com"},
+		{url: "Downloading https://example.com\nthis is an example", want: "https://example.com"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.url, func(t *testing.T) {

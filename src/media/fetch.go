@@ -90,12 +90,13 @@ func getUrl(r *http.Request) string {
 	return strings.TrimSpace(r.URL.Query().Get("url"))
 }
 
-func getMediaResults(url string) ([]Media, string, error) {
-	if url == "" {
+func getMediaResults(inputUrl string) ([]Media, string, error) {
+	if inputUrl == "" {
 		return nil, "", errors.New("missing URL")
 	}
 
-	url = utils.NormalizeUrl(url)
+	url := utils.NormalizeUrl(inputUrl)
+	log.Info().Msgf("Got input '%s' and extracted '%s'", inputUrl, url)
 
 	// NOTE: This system is for a simple use case, meant to run at home. This is not a great design for a robust system.
 	// We are hashing the URL here and writing files to disk to a consistent directory based on the ID. You can imagine
