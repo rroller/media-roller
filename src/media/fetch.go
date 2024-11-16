@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/dustin/go-humanize"
 	"html/template"
+	"media-roller/src/utils"
 	"net/http"
 	"path/filepath"
 	"regexp"
@@ -94,6 +95,8 @@ func getMediaResults(url string) ([]Media, string, error) {
 		return nil, "", errors.New("missing URL")
 	}
 
+	url = utils.NormalizeUrl(url)
+
 	// NOTE: This system is for a simple use case, meant to run at home. This is not a great design for a robust system.
 	// We are hashing the URL here and writing files to disk to a consistent directory based on the ID. You can imagine
 	// concurrent users would break this for the same URL. That's fine given this is for a simple home system.
@@ -128,7 +131,7 @@ func downloadMedia(url string) (string, string, error) {
 	cmd := exec.Command("yt-dlp",
 		"--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
 		"--merge-output-format", "mp4",
-	        "--trim-filenames", "200",
+		"--trim-filenames", "200",
 		"--restrict-filenames",
 		"--write-info-json",
 		"--verbose",
