@@ -105,6 +105,9 @@ func getMediaResults(inputUrl string) ([]Media, string, error) {
 	id := GetMD5Hash(url)
 	// Look to see if we already have the media on disk
 	medias, err := getAllFilesForId(id)
+	if err != nil {
+		return nil, "", err
+	}
 	if len(medias) == 0 {
 		// We don't, so go fetch it
 		errMessage := ""
@@ -189,11 +192,14 @@ func getAllFilesForId(id string) ([]Media, error) {
 	root := getMediaDirectory(id)
 	file, err := os.Open(root)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	files, _ := file.Readdirnames(0) // 0 to read all files and folders
 	if len(files) == 0 {
-		return nil, errors.New("ID not found")
+		return nil, errors.New("ID not found: " + id)
 	}
 
 	var medias []Media

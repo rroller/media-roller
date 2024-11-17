@@ -71,7 +71,7 @@ func GetInstalledVersion() string {
 		log.Error().Err(err).Msgf("Error getting installed version")
 	}
 
-	version := strings.TrimSpace(string(s.Bytes()))
+	version := strings.TrimSpace(s.String())
 	if version == "" {
 		version = "unknown"
 	}
