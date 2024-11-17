@@ -28,7 +28,10 @@
             <div style="margin-top:20px;">
                 <h2>Done!</h2>
                 {{range .media}}
-                <a style="color: dodgerblue" href="/download?id={{.Id}}">{{.Name}}</a> <small>{{.HumanSize}}</small>
+                <a style="color: dodgerblue" href="/download?id={{.Id}}">{{.Name}}</a> <small>{{.HumanSize}}</small><br>
+                <video controls loop width="250">
+                    <source src="/download?id={{.Id}}" type="video/mp4"/>
+                </video>
                 {{ end }}
             </div>
             {{ end }}

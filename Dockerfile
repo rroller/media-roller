@@ -1,4 +1,4 @@
-FROM golang:1.23.2-alpine3.20 AS builder
+FROM golang:1.23.3-alpine3.20 AS builder
 
 RUN apk add --no-cache curl
 
@@ -31,8 +31,8 @@ COPY static /app/static
 WORKDIR /app
 
 # Get new releases here https://github.com/yt-dlp/yt-dlp/releases
-RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/download/2024.10.07/yt-dlp -o /usr/local/bin/yt-dlp && \
-    echo "8d8151368376c4d2f6dd6993d893be09334c06b7e6fa1e7e07bc3c4fbef848b3 /usr/local/bin/yt-dlp" | sha256sum -c - && \
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/download/2024.11.04/yt-dlp -o /usr/local/bin/yt-dlp && \
+    echo "dad4a9ce9db902cf1e69ca71c0ca778917fa5a804a2ab43bac612b0abef76314 /usr/local/bin/yt-dlp" | sha256sum -c - && \
     chmod a+rx /usr/local/bin/yt-dlp
 
 RUN yt-dlp --update --update-to nightly
@@ -41,4 +41,4 @@ RUN yt-dlp --update --update-to nightly
 RUN yt-dlp --version && \
     ffmpeg -version
 
-CMD /app/media-roller
+ENTRYPOINT ["/app/media-roller"]
