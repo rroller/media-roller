@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dustin/go-humanize"
+	"golang.org/x/sync/errgroup"
 	"html/template"
 	"media-roller/src/utils"
 	"net/http"
@@ -23,7 +24,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"sync"
 )
 
 type Media struct {
@@ -156,16 +156,15 @@ func downloadMedia(url string) (string, string, error) {
 		return "", err.Error(), err
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(1)
+	eg := errgroup.Group{}
 
-	go func() {
+	eg.Go(func() error {
 		_, errStdout = io.Copy(stdout, stdoutIn)
-		wg.Done()
-	}()
+		return nil
+	})
 
 	_, errStderr = io.Copy(stderr, stderrIn)
-	wg.Wait()
+	_ = eg.Wait()
 	log.Info().Msgf("Done with %s", id)
 
 	err = cmd.Wait()
