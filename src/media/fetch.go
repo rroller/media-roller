@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -50,9 +51,9 @@ func Index(w http.ResponseWriter, _ *http.Request) {
 }
 
 func FetchMedia(w http.ResponseWriter, r *http.Request) {
-	url := getUrl(r)
+	url, args := getUrl(r)
 
-	media, ytdlpErrorMessage, err := getMediaResults(url)
+	media, ytdlpErrorMessage, err := getMediaResults(url, args)
 	data := map[string]interface{}{
 		"url":          url,
 		"media":        media,
@@ -71,8 +72,8 @@ func FetchMedia(w http.ResponseWriter, r *http.Request) {
 }
 
 func FetchMediaApi(w http.ResponseWriter, r *http.Request) {
-	url := getUrl(r)
-	medias, _, err := getMediaResults(url)
+	url, args := getUrl(r)
+	medias, _, err := getMediaResults(url, args)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -86,23 +87,37 @@ func FetchMediaApi(w http.ResponseWriter, r *http.Request) {
 	streamFileToClientById(w, r, medias[0].Id)
 }
 
-func getUrl(r *http.Request) string {
-	return strings.TrimSpace(r.URL.Query().Get("url"))
+func getUrl(r *http.Request) (string, map[string]string) {
+	u := strings.TrimSpace(r.URL.Query().Get("url"))
+
+	// Support yt-dlp arguments passed in via the url. We'll assume anything starting with a dash - is an argument
+	args := make(map[string]string)
+	for k, v := range r.URL.Query() {
+		if strings.HasPrefix(k, "-") {
+			if len(v) > 0 {
+				args[k] = v[0]
+			} else {
+				args[k] = ""
+			}
+		}
+	}
+
+	return u, args
 }
 
-func getMediaResults(inputUrl string) ([]Media, string, error) {
+func getMediaResults(inputUrl string, args map[string]string) ([]Media, string, error) {
 	if inputUrl == "" {
 		return nil, "", errors.New("missing URL")
 	}
 
 	url := utils.NormalizeUrl(inputUrl)
-	log.Info().Msgf("Got input '%s' and extracted '%s'", inputUrl, url)
+	log.Info().Msgf("Got input '%s' and extracted '%s' with args %v", inputUrl, url, args)
 
 	// NOTE: This system is for a simple use case, meant to run at home. This is not a great design for a robust system.
 	// We are hashing the URL here and writing files to disk to a consistent directory based on the ID. You can imagine
 	// concurrent users would break this for the same URL. That's fine given this is for a simple home system.
 	// Future work can make this more sophisticated.
-	id := GetMD5Hash(url)
+	id := GetMD5Hash(url, args)
 	// Look to see if we already have the media on disk
 	medias, err := getAllFilesForId(id)
 	if err != nil {
@@ -111,7 +126,7 @@ func getMediaResults(inputUrl string) ([]Media, string, error) {
 	if len(medias) == 0 {
 		// We don't, so go fetch it
 		errMessage := ""
-		id, errMessage, err = downloadMedia(url)
+		id, errMessage, err = downloadMedia(url, args)
 		if err != nil {
 			return nil, errMessage, err
 		}
@@ -125,25 +140,51 @@ func getMediaResults(inputUrl string) ([]Media, string, error) {
 }
 
 // returns the ID of the file, and error message, and an error
-func downloadMedia(url string) (string, string, error) {
+func downloadMedia(url string, requestArgs map[string]string) (string, string, error) {
 	// The id will be used as the name of the parent directory of the output files
-	id := GetMD5Hash(url)
+	id := GetMD5Hash(url, requestArgs)
 	name := getMediaDirectory(id) + "%(id)s.%(ext)s"
 
 	log.Info().Msgf("Downloading %s to %s", url, name)
 
-	args := []string{
-		"--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
-		"--merge-output-format", "mp4",
-		"--trim-filenames", "100",
-		"--restrict-filenames",
-		"--write-info-json",
-		"--verbose",
-		"--output", name,
+	defaultArgs := map[string]string{
+		"--format":              "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+		"--merge-output-format": "mp4",
+		"--trim-filenames":      "100",
+		"--restrict-filenames":  "",
+		"--write-info-json":     "",
+		"--verbose":             "",
+		"--output":              name,
 	}
 
-	if vars := getEnvVars(); len(vars) > 0 {
-		args = append(args, vars...)
+	args := make([]string, 0)
+
+	// First add all default arguments that were not supplied as request level arguments
+	for arg, value := range defaultArgs {
+		if _, has := requestArgs[arg]; !has {
+			args = append(args, arg)
+			if value != "" {
+				args = append(args, value)
+			}
+		}
+	}
+
+	// Now add all request level arguments
+	for arg, value := range requestArgs {
+		args = append(args, arg)
+		if value != "" {
+			args = append(args, value)
+		}
+	}
+
+	// And finally add any environment level arguments not supplied as request level args
+	for arg, value := range getEnvVars() {
+		if _, has := requestArgs[arg]; !has {
+			args = append(args, arg)
+			if value != "" {
+				args = append(args, value)
+			}
+		}
 	}
 
 	args = append(args, url)
@@ -258,8 +299,17 @@ func getFileFromId(id string) (string, error) {
 	return "", errors.New("unable to find file")
 }
 
-func GetMD5Hash(url string) string {
-	return fmt.Sprintf("%x", md5.Sum([]byte(url)))
+func GetMD5Hash(url string, args map[string]string) string {
+	id := url
+	if len(args) > 0 {
+		tmp := make([]string, 0)
+		for k, v := range args {
+			tmp = append(tmp, k, v)
+		}
+		sort.Strings(tmp)
+		id += ":" + strings.Join(tmp, ",")
+	}
+	return fmt.Sprintf("%x", md5.Sum([]byte(id)))
 }
 
 func isValidId(id string) bool {
@@ -277,12 +327,10 @@ func getDownloadDir() string {
 	return "downloads/"
 }
 
-func getEnvVars() []string {
-	vars := make([]string, 0)
-
+func getEnvVars() map[string]string {
+	vars := make(map[string]string)
 	if ev := strings.TrimSpace(os.Getenv("MR_PROXY")); ev != "" {
-		vars = append(vars, "--proxy", ev)
+		vars["--proxy"] = ev
 	}
-
 	return vars
 }
