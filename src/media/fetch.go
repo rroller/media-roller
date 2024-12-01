@@ -130,12 +130,12 @@ func downloadMedia(url string) (string, string, error) {
 	id := GetMD5Hash(url)
 	name := getMediaDirectory(id) + "%(id)s.%(ext)s"
 
-	log.Info().Msgf("Downloading %s to %s", url, id)
+	log.Info().Msgf("Downloading %s to %s", url, name)
 
 	cmd := exec.Command("yt-dlp",
 		"--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
 		"--merge-output-format", "mp4",
-		"--trim-filenames", "40",
+		"--trim-filenames", "100",
 		"--restrict-filenames",
 		"--write-info-json",
 		"--verbose",
