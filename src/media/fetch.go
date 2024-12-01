@@ -64,7 +64,7 @@ func FetchMedia(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := fetchIndexTmpl.Execute(w, data); err != nil {
+	if err = fetchIndexTmpl.Execute(w, data); err != nil {
 		log.Error().Msgf("Error rendering template: %v", err)
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 	}
@@ -132,7 +132,7 @@ func downloadMedia(url string) (string, string, error) {
 
 	log.Info().Msgf("Downloading %s to %s", url, name)
 
-	cmd := exec.Command("yt-dlp",
+	args := []string{
 		"--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
 		"--merge-output-format", "mp4",
 		"--trim-filenames", "100",
@@ -140,7 +140,15 @@ func downloadMedia(url string) (string, string, error) {
 		"--write-info-json",
 		"--verbose",
 		"--output", name,
-		url)
+	}
+
+	if vars := getEnvVars(); len(vars) > 0 {
+		args = append(args, vars...)
+	}
+
+	args = append(args, url)
+
+	cmd := exec.Command("yt-dlp", args...)
 
 	var stdoutBuf, stderrBuf bytes.Buffer
 	stdoutIn, _ := cmd.StdoutPipe()
@@ -206,9 +214,9 @@ func getAllFilesForId(id string) ([]Media, error) {
 	// We expect two files to be produced for each video, a json manifest and an mp4.
 	for _, f := range files {
 		if !strings.HasSuffix(f, ".json") {
-			fi, err := os.Stat(root + f)
+			fi, err2 := os.Stat(root + f)
 			var size int64 = 0
-			if err == nil {
+			if err2 == nil {
 				size = fi.Size()
 			}
 
@@ -267,4 +275,14 @@ func getDownloadDir() string {
 		return dir
 	}
 	return "downloads/"
+}
+
+func getEnvVars() []string {
+	vars := make([]string, 0)
+
+	if ev := strings.TrimSpace(os.Getenv("MR_PROXY")); ev != "" {
+		vars = append(vars, "--proxy", ev)
+	}
+
+	return vars
 }

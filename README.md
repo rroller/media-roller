@@ -27,6 +27,10 @@ With Docker: `ronnieroller/media-roller:latest`.
 See https://hub.docker.com/repository/docker/ronnieroller/media-roller
 The files are saved to the /download directory which you can mount as needed.
 
+## Docker Environemnt Variables
+* `MR_DOWNLOAD_DIR` where videos are saved. Defaults to `/download`
+* `MR_PROXY` will pass the value to yt-dlp witht he `--proxy` argument. Defaults to empty
+
 # API
 To download a video directly, use the API endpoint:
 
