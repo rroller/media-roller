@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>about - media-roller</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" type="text/css" href="/static/css//bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+</head>
+<body>
+<div class="container d-flex flex-column text-light">
+    <div class="flex-grow-1"></div>
+    <div class="jumbotron bg-transparent flex-grow-1">
+        <h1 class="display-4"><a class="text-light" href="/">media roller</a></h1>
+        <div>
+            {{ .details }}
+            <table>
+                <tbody>
+                <tr>
+                    <td style="width:110px;">Source</td>
+                    <td><a href="https://github.com/rroller/media-roller">https://github.com/rroller/media-roller</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/yt-dlp/yt-dlp">yt-dlp</a></td>
+                    <td>{{ $.ytDlpVersion }}</td>
+                </tr>
+                <tr>
+                    <td><a href="https://go.dev/doc/install">Golang</a></td>
+                    <td>{{ $.goVersion }}</td>
+                </tr>
+                <tr>
+                    <td><a href="https://www.python.org/downloads/">Python</a></td>
+                    <td>{{ $.pythonVersion }}</td>
+                </tr>
+                <tr><td>os</td><td>{{ $.os }}</td></tr>
+                <tr><td>kernel</td><td>{{ $.kernel }}</td></tr>
+                <tr><td>core</td><td>{{ $.core }}</td></tr>
+                <tr><td>platform</td><td>{{ $.platform }}</td></tr>
+                <tr><td>hostname</td><td>{{ $.hostname }}</td></tr>
+                <tr><td>cpus</td><td>{{ $.cpus }}</td></tr>
+                <tr>
+                    <td style="vertical-align: top"><a href="https://www.ffmpeg.org/download.html">ffmpeg</a></td>
+                    <td>{{range $element := .ffmpegVersion}}{{ $element }}<br>{{end}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <footer>
+        <div>
+        </div>
+    </footer>
+</div>
+</body>
+</html>

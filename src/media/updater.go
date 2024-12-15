@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"github.com/rs/zerolog/log"
 	"io"
+	"media-roller/src/utils"
 	"os"
 	"os/exec"
-	"strings"
 	"sync"
 )
 
@@ -61,17 +61,7 @@ func UpdateYtDlp() error {
 }
 
 func GetInstalledVersion() string {
-	cmd := exec.Command("yt-dlp", "--version")
-
-	var s bytes.Buffer
-	cmd.Stdout = &s
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Run(); err != nil {
-		log.Error().Err(err).Msgf("Error getting installed version")
-	}
-
-	version := strings.TrimSpace(s.String())
+	version := utils.RunCommand("yt-dlp", "--version")
 	if version == "" {
 		version = "unknown"
 	}
