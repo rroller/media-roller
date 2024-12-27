@@ -154,6 +154,7 @@ func downloadMedia(url string, requestArgs map[string]string) (string, string, e
 		"--merge-output-format": "mp4",
 		"--trim-filenames":      "100",
 		"--recode-video":        "mp4",
+		"--format-sort":         "codec:h264",
 		"--restrict-filenames":  "",
 		"--write-info-json":     "",
 		"--verbose":             "",
