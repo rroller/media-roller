@@ -23,7 +23,8 @@ RUN apk add --update --no-cache \
 
 # https://hub.docker.com/r/mwader/static-ffmpeg/tags
 # https://github.com/wader/static-ffmpeg
-COPY --from=mwader/static-ffmpeg:7.1 /ffmpeg /usr/local/bin/
+COPY --from=mwader/static-ffmpeg:7.1 /ffmpeg  /usr/local/bin/
+COPY --from=mwader/static-ffmpeg:7.1 /ffprobe /usr/local/bin/
 COPY --from=builder /app/media-roller /app/media-roller
 COPY templates /app/templates
 COPY static /app/static

@@ -23,16 +23,17 @@ func AboutIndex(w http.ResponseWriter, _ *http.Request) {
 	gi, _ := goInfo.GetInfo()
 
 	data := map[string]interface{}{
-		"ytDlpVersion":  CachedYtDlpVersion,
-		"goVersion":     strings.TrimPrefix(utils.RunCommand("go", "version"), "go version "),
-		"pythonVersion": strings.TrimPrefix(pythonVersion, "Python "),
-		"ffmpegVersion": newlineRegex.Split(utils.RunCommand("ffmpeg", "-version"), -1),
-		"os":            gi.OS,
-		"kernel":        gi.Kernel,
-		"core":          gi.Core,
-		"platform":      gi.Platform,
-		"hostname":      gi.Hostname,
-		"cpus":          gi.CPUs,
+		"ytDlpVersion":   CachedYtDlpVersion,
+		"goVersion":      strings.TrimPrefix(utils.RunCommand("go", "version"), "go version "),
+		"pythonVersion":  strings.TrimPrefix(pythonVersion, "Python "),
+		"ffmpegVersion":  newlineRegex.Split(utils.RunCommand("ffmpeg", "-version"), -1),
+		"ffprobeVersion": newlineRegex.Split(utils.RunCommand("ffprobe", "-version"), -1),
+		"os":             gi.OS,
+		"kernel":         gi.Kernel,
+		"core":           gi.Core,
+		"platform":       gi.Platform,
+		"hostname":       gi.Hostname,
+		"cpus":           gi.CPUs,
 	}
 
 	if err := aboutIndexTmpl.Execute(w, data); err != nil {
