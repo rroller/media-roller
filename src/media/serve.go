@@ -29,6 +29,7 @@ func ServeMedia(w http.ResponseWriter, r *http.Request) {
 func streamFileToClientById(w http.ResponseWriter, r *http.Request, id string) {
 	filename, err := getFileFromId(id)
 	if err != nil {
+		log.Error().Msgf("error getting file from id %s: %v", id, err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
@@ -40,6 +41,7 @@ func streamFileToClient(w http.ResponseWriter, r *http.Request, filename string)
 	openfile, err := os.Open(filename)
 	if err != nil {
 		//File not found, send 404
+		log.Error().Msgf("error opening file %s: %v", filename, err)
 		http.Error(w, "File not found.", 404)
 		return
 	}
@@ -61,6 +63,8 @@ func streamFileToClient(w http.ResponseWriter, r *http.Request, filename string)
 	// Send the headers
 	w.Header().Set("Content-Disposition", "filename="+filepath.Base(filename))
 	w.Header().Set("Content-Type", fileContentType)
+
+	log.Info().Msgf("Opening file for streaming %s", filename)
 
 	// Send the file
 	// We read n bytes from the file already, so we reset the offset back to 0

@@ -75,10 +75,12 @@ func FetchMediaApi(w http.ResponseWriter, r *http.Request) {
 	url, args := getUrl(r)
 	medias, _, err := getMediaResults(url, args)
 	if err != nil {
+		log.Error().Msgf("error getting media results: %v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	if len(medias) == 0 {
+		log.Error().Msgf("not media found")
 		http.Error(w, "Media not found", http.StatusBadRequest)
 		return
 	}
@@ -151,6 +153,7 @@ func downloadMedia(url string, requestArgs map[string]string) (string, string, e
 		"--format":              "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
 		"--merge-output-format": "mp4",
 		"--trim-filenames":      "100",
+		"--recode-video":        "mp4",
 		"--restrict-filenames":  "",
 		"--write-info-json":     "",
 		"--verbose":             "",
