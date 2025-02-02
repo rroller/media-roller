@@ -16,7 +16,7 @@ func RunCommand(name string, args ...string) string {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		log.Error().Err(err).Msgf("Error running command " + strings.Join(args, " "))
+		log.Error().Err(err).Msgf("Error running command %s", strings.Join(args, " "))
 	}
 
 	return strings.TrimSpace(s.String())
