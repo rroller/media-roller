@@ -1,4 +1,4 @@
-FROM golang:1.23.4-alpine3.21 AS builder
+FROM golang:1.23.5-alpine3.21 AS builder
 
 RUN apk add --no-cache curl
 
@@ -32,8 +32,8 @@ COPY static /app/static
 WORKDIR /app
 
 # Get new releases here https://github.com/yt-dlp/yt-dlp/releases
-RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/download/2024.12.13/yt-dlp -o /usr/local/bin/yt-dlp && \
-    echo "ec5f59f8b8908d93b2bdf6663c3ecba70781f39de21255d183220f250ebccc94 /usr/local/bin/yt-dlp" | sha256sum -c - && \
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/download/2025.01.26/yt-dlp -o /usr/local/bin/yt-dlp && \
+    echo "227631e434d6f8418c4b821aeefc6302d3d1db1e7d805da2ad5b301c8d910107 /usr/local/bin/yt-dlp" | sha256sum -c - && \
     chmod a+rx /usr/local/bin/yt-dlp
 
 RUN yt-dlp --update --update-to nightly
