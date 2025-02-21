@@ -54,7 +54,7 @@ jobs:
         with:
           images: |
             docker.io/ronnieroller/media-roller
-            ghcr.io/ronnieroller/media-roller
+            ghcr.io/rroller/media-roller
           tags: |
             type=ref,event=branch,branch=master,latest=true
             type=sha
