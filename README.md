@@ -23,8 +23,14 @@ Or for docker locally:
  ./docker-run.sh
 ```
 
-With Docker: `ronnieroller/media-roller:latest`.
-See https://hub.docker.com/repository/docker/ronnieroller/media-roller
+With Docker, published to both dockerhub and github.
+* ghcr: `docker pull ghcr.io/rroller/media-roller:master`
+* dockerhub: `docker pull ronnieroller/media-roller`
+
+See:
+* https://github.com/rroller/media-roller/pkgs/container/media-roller
+* https://hub.docker.com/repository/docker/ronnieroller/media-roller
+
 The files are saved to the /download directory which you can mount as needed.
 
 ## Docker Environemnt Variables
