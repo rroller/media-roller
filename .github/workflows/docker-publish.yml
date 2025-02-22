@@ -56,7 +56,7 @@ jobs:
             docker.io/ronnieroller/media-roller
             ghcr.io/rroller/media-roller
           tags: |
-            type=ref,event=branch,branch=master,latest=true
+            type=raw,value=latest,enable={{is_default_branch}}
             type=sha
 
       # Build and push Docker image with Buildx (don't push on PR)
