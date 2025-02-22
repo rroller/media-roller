@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	// Setup routes
+	// setup routes
 	router := chi.NewRouter()
 	router.Route("/", func(r chi.Router) {
 		router.Get("/", media.Index)
