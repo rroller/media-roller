@@ -19,6 +19,8 @@ FROM python:3.13.7-alpine3.22
 ENV MR_DOWNLOAD_DIR="/download"
 
 RUN apk add --update --no-cache \
+    # https://github.com/yt-dlp/yt-dlp/issues/14404 \
+    deno \
     curl
 
 # https://hub.docker.com/r/mwader/static-ffmpeg/tags

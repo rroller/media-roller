@@ -1,13 +1,14 @@
 package media
 
 import (
-	"github.com/matishsiao/goInfo"
-	"github.com/rs/zerolog/log"
 	"html/template"
 	"media-roller/src/utils"
 	"net/http"
 	"regexp"
 	"strings"
+
+	"github.com/matishsiao/goInfo"
+	"github.com/rs/zerolog/log"
 )
 
 var aboutIndexTmpl = template.Must(template.ParseFiles("templates/media/about.html"))
@@ -28,6 +29,7 @@ func AboutIndex(w http.ResponseWriter, _ *http.Request) {
 		"pythonVersion":  strings.TrimPrefix(pythonVersion, "Python "),
 		"ffmpegVersion":  newlineRegex.Split(utils.RunCommand("ffmpeg", "-version"), -1),
 		"ffprobeVersion": newlineRegex.Split(utils.RunCommand("ffprobe", "-version"), -1),
+		"deno":           strings.TrimPrefix(utils.RunCommand("deno", "--version"), "go version "),
 		"os":             gi.OS,
 		"kernel":         gi.Kernel,
 		"core":           gi.Core,
