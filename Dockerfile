@@ -13,7 +13,7 @@ RUN go mod download
 RUN go build -x -o media-roller ./src
 
 # yt-dlp needs python
-FROM python:3.13.1-alpine3.21
+FROM python:3.13.7-alpine3.22
 
 # This is where the downloaded files will be saved in the container.
 ENV MR_DOWNLOAD_DIR="/download"
