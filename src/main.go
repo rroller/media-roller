@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"github.com/go-chi/chi/v5"
-	"github.com/rs/zerolog/log"
 	"media-roller/src/media"
 	"net/http"
 	"os"
@@ -14,6 +12,9 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
@@ -119,7 +120,7 @@ func fileServer(r chi.Router, public string, static string) {
 	fs := http.StripPrefix(public, http.FileServer(http.Dir(root)))
 
 	if public != "/" && public[len(public)-1] != '/' {
-		r.Get(public, http.RedirectHandler(public+"/", 301).ServeHTTP)
+		r.Get(public, http.RedirectHandler(public+"/", http.StatusMovedPermanently).ServeHTTP)
 		public += "/"
 	}
 
