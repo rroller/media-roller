@@ -34,8 +34,8 @@ COPY static /app/static
 WORKDIR /app
 
 # Get new releases here https://github.com/yt-dlp/yt-dlp/releases
-RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/download/2025.09.26/yt-dlp -o /usr/local/bin/yt-dlp && \
-    echo "9215a371883aea75f0f2102c679333d813d9a5c3bceca212879a4a741a5b4657 /usr/local/bin/yt-dlp" | sha256sum -c - && \
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/download/2026.03.17/yt-dlp -o /usr/local/bin/yt-dlp && \
+    echo "3bda0968a01cde70d26720653003b28553c71be14dcb2e5f4c24e9921fdad745 /usr/local/bin/yt-dlp" | sha256sum -c - && \
     chmod a+rx /usr/local/bin/yt-dlp
 
 RUN yt-dlp --update --update-to nightly
