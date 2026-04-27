@@ -1,4 +1,4 @@
-FROM golang:1.25.3-alpine3.22 AS builder
+FROM golang:1.26.2-alpine3.23 AS builder
 
 RUN apk add --no-cache curl
 
@@ -13,7 +13,7 @@ RUN go mod download
 RUN go build -x -o media-roller ./src
 
 # yt-dlp needs python
-FROM python:3.13.7-alpine3.22
+FROM python:3.15.0a8-alpine3.23
 
 # This is where the downloaded files will be saved in the container.
 ENV MR_DOWNLOAD_DIR="/download"
