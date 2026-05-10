@@ -21,7 +21,11 @@ ENV MR_DOWNLOAD_DIR="/download"
 RUN apk add --update --no-cache \
     # https://github.com/yt-dlp/yt-dlp/issues/14404 \
     deno \
-    curl
+    curl \
+    gcc \
+    musl-dev \
+    python3-dev \
+    libffi-dev
 
 # https://hub.docker.com/r/mwader/static-ffmpeg/tags
 # https://github.com/wader/static-ffmpeg
@@ -32,6 +36,8 @@ COPY templates /app/templates
 COPY static /app/static
 
 WORKDIR /app
+
+RUN pip install curl_cffi --upgrade --pre
 
 # Get new releases here https://github.com/yt-dlp/yt-dlp/releases
 RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/download/2026.03.17/yt-dlp -o /usr/local/bin/yt-dlp && \
