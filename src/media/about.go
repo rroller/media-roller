@@ -23,7 +23,7 @@ func AboutIndex(w http.ResponseWriter, _ *http.Request) {
 
 	gi, _ := goInfo.GetInfo()
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"ytDlpVersion":   CachedYtDlpVersion,
 		"goVersion":      strings.TrimPrefix(utils.RunCommand("go", "version"), "go version "),
 		"pythonVersion":  strings.TrimPrefix(pythonVersion, "Python "),

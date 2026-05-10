@@ -35,12 +35,10 @@ func UpdateYtDlp() error {
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(1)
 
-	go func() {
+	wg.Go(func() {
 		_, errStdout = io.Copy(stdout, stdoutIn)
-		wg.Done()
-	}()
+	})
 
 	_, errStderr = io.Copy(stderr, stderrIn)
 	wg.Wait()

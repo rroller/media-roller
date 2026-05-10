@@ -54,7 +54,7 @@ func FetchMedia(w http.ResponseWriter, r *http.Request) {
 	url, args := getUrl(r)
 
 	media, ytdlpErrorMessage, err := getMediaResults(url, args)
-	data := map[string]interface{}{
+	data := map[string]any{
 		"url":          url,
 		"media":        media,
 		"error":        ytdlpErrorMessage,
