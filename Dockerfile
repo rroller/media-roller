@@ -38,6 +38,7 @@ COPY static /app/static
 WORKDIR /app
 
 RUN pip install curl_cffi --upgrade --pre
+RUN pip install -U yt-dlp-ejs
 
 # Get new releases here https://github.com/yt-dlp/yt-dlp/releases
 RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/download/2026.03.17/yt-dlp -o /usr/local/bin/yt-dlp && \
