@@ -45,7 +45,11 @@ func streamFileToClient(w http.ResponseWriter, r *http.Request, filename string)
 		http.Error(w, "File not found.", 404)
 		return
 	}
-	defer openfile.Close()
+	defer func() {
+		if err := openfile.Close(); err != nil {
+			log.Error().Err(err).Msgf("error closing file %s", filename)
+		}
+	}()
 
 	// Get the Content-Type of the file
 	// Create a buffer to store the header of the file in
