@@ -25,17 +25,27 @@
                 </div>
             </form>
             {{ if .media }}
-            <div style="margin-top:20px;">
-                <h2>Done!</h2>
-                {{range .media}}
-                <div>
-                    <a style="color: dodgerblue" href="/download?id={{.Id}}">{{.Name}}</a> <small>{{.HumanSize}}</small><br>
-                    <video controls loop width="250">
-                        <source src="/download?id={{.Id}}" type="video/mp4"/>
-                    </video>
+            <section class="media-library" aria-labelledby="downloads-heading">
+                <h2 id="downloads-heading">Downloads</h2>
+                <div class="media-grid">
+                    {{range .media}}
+                    <article class="media-card">
+                        <video controls preload="metadata" playsinline>
+                            <source src="/download?id={{.Id}}" type="video/mp4"/>
+                            Your browser does not support video playback.
+                        </video>
+                        <div class="media-card-details">
+                            <a href="/download?id={{.Id}}">{{.Name}}</a>
+                            <small>{{.HumanSize}}</small>
+                            <form action="/media/delete" method="POST" onsubmit="return confirm('Delete {{.Name}}?');">
+                                <input type="hidden" name="id" value="{{.Id}}">
+                                <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+                            </form>
+                        </div>
+                    </article>
+                    {{ end }}
                 </div>
-                {{ end }}
-            </div>
+            </section>
             {{ end }}
             {{ if .error }}
             <h4 style="margin-top:20px;">Error</h4>

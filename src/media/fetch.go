@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -41,13 +42,39 @@ var downloadDir = getDownloadDir()
 var idCharSet = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString
 
 func Index(w http.ResponseWriter, _ *http.Request) {
-	data := map[string]string{
+	var medias []Media
+	if isMediaListEnabled() {
+		var err error
+		medias, err = getAllMedia()
+		if err != nil {
+			log.Error().Err(err).Msg("Unable to list downloaded media")
+		}
+	}
+	data := map[string]any{
+		"media":        medias,
 		"ytDlpVersion": CachedYtDlpVersion,
 	}
 	if err := fetchIndexTmpl.Execute(w, data); err != nil {
 		log.Error().Msgf("Error rendering template: %v", err)
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 	}
+}
+
+// DeleteMedia removes the downloaded media and its metadata for one download ID.
+func DeleteMedia(w http.ResponseWriter, r *http.Request) {
+	id := r.FormValue("id")
+	if !isValidId(id) {
+		http.Error(w, "Invalid file ID", http.StatusBadRequest)
+		return
+	}
+
+	if err := os.RemoveAll(getMediaDirectory(id)); err != nil {
+		log.Error().Err(err).Msgf("Unable to delete media %s", id)
+		http.Error(w, "Unable to delete media", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func FetchMedia(w http.ResponseWriter, r *http.Request) {
@@ -278,6 +305,33 @@ func getAllFilesForId(id string) ([]Media, error) {
 	return medias, nil
 }
 
+// getAllMedia returns every downloaded media file.
+func getAllMedia() ([]Media, error) {
+	entries, err := os.ReadDir(downloadDir)
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var medias []Media
+	for _, entry := range entries {
+		if !entry.IsDir() || !isValidId(entry.Name()) {
+			continue
+		}
+		files, err := getAllFilesForId(entry.Name())
+		if err != nil {
+			return nil, err
+		}
+		medias = append(medias, files...)
+	}
+	sort.Slice(medias, func(i, j int) bool {
+		return medias[i].Name < medias[j].Name
+	})
+	return medias, nil
+}
+
 // id is expected to be validated prior to calling this func
 // TODO: This needs to handle multiple files in the directory
 func getFileFromId(id string) (string, error) {
@@ -329,6 +383,13 @@ func getDownloadDir() string {
 		return dir
 	}
 	return "downloads/"
+}
+
+// isMediaListEnabled reports whether the downloaded-media library is shown on
+// the home page. It defaults to enabled so existing deployments keep showing it.
+func isMediaListEnabled() bool {
+	enabled, err := strconv.ParseBool(strings.TrimSpace(os.Getenv("MR_MEDIA_LIST_ENABLED")))
+	return err != nil || enabled
 }
 
 func getEnvVars() map[string]string {

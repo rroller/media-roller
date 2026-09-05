@@ -25,6 +25,7 @@ func main() {
 		router.Get("/fetch", media.FetchMedia)
 		router.Get("/api/download", media.FetchMediaApi)
 		router.Get("/download", media.ServeMedia)
+		router.Post("/media/delete", media.DeleteMedia)
 		router.Get("/about", media.AboutIndex)
 	})
 	fileServer(router, "/static", "static/")

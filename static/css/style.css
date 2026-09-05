@@ -5,3 +5,52 @@ body {
 .container {
     height: 100vh;
 }
+
+.media-library {
+    margin-top: 2rem;
+    text-align: left;
+}
+
+.media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.media-card {
+    overflow: hidden;
+    border: 1px solid #6c757d;
+    border-radius: .5rem;
+    background: #343a40;
+}
+
+.media-card video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    background: #000;
+}
+
+.media-card-details {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem;
+}
+
+.media-card-details a {
+    overflow: hidden;
+    color: dodgerblue;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.media-card-details small {
+    grid-column: 1;
+}
+
+.media-card-details form {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+}

@@ -33,9 +33,10 @@ See:
 
 The files are saved to the /download directory which you can mount as needed.
 
-## Docker Environemnt Variables
+## Docker Environment Variables
 * `MR_DOWNLOAD_DIR` where videos are saved. Defaults to `/download`
 * `MR_PROXY` will pass the value to yt-dlp witht he `--proxy` argument. Defaults to empty
+* `MR_MEDIA_LIST_ENABLED` controls the Downloads library on the home page. Defaults to `true`; set to `false` to hide it.
 
 # API
 To download a video directly, use the API endpoint:
