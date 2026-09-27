@@ -33,10 +33,42 @@ See:
 
 The files are saved to the /download directory which you can mount as needed.
 
-## Docker Environment Variables
+## Environment variables
 * `MR_DOWNLOAD_DIR` where videos are saved. Defaults to `/download`
 * `MR_PROXY` will pass the value to yt-dlp witht he `--proxy` argument. Defaults to empty
 * `MR_MEDIA_LIST_ENABLED` controls the Downloads library on the home page. Defaults to `true`; set to `false` to hide it.
+* `MR_COOKIES_DIR` is the directory containing `cookies.txt`. Defaults to `cookies` (`/app/cookies` in Docker).
+
+## Cookies
+
+Place a Netscape-format `cookies.txt` export in a directory on the server. When
+present, the app passes `--cookies <directory>/cookies.txt` to yt-dlp for downloads
+from both the web form and API. If the file is absent, downloads run without cookies.
+To refresh or remove cookies, replace or delete the file in that directory.
+
+For local runs:
+
+```bash
+MR_COOKIES_DIR="/absolute/path/to/cookies" ./run.sh
+```
+
+For Docker, mount the directory containing `cookies.txt`:
+
+```bash
+docker run -p 3000:3000 \
+  -v "$(pwd)/download:/download" \
+  -v "/absolute/path/to/cookies:/app/cookies" \
+  ronnieroller/media-roller
+```
+
+`./docker-run.sh` mounts `./cookies` by default; set `MR_COOKIES_DIR` to use another
+host directory. The cookie file and directory must be writable by yt-dlp, which
+updates its cookie jar. Keep this directory outside the download and static
+folders. The default cookie directory and `*cookies*.txt` exports are excluded
+from Git and Docker build contexts.
+
+Existing explicit yt-dlp options such as `--cookies`, `--no-cookies`, and
+`--cookies-from-browser` take precedence over the configured file.
 
 # API
 To download a video directly, use the API endpoint:

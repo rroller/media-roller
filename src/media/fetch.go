@@ -8,6 +8,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"html/template"
 	"media-roller/src/utils"
+	"media-roller/templates"
 	"net/http"
 	"path/filepath"
 	"regexp"
@@ -35,7 +36,7 @@ type Media struct {
 	HumanSize   string
 }
 
-var fetchIndexTmpl = template.Must(template.ParseFiles("templates/media/index.html"))
+var fetchIndexTmpl = template.Must(template.ParseFS(templates.Files, "media/index.html"))
 
 // Where the media files are saved. Always has a trailing slash
 var downloadDir = getDownloadDir()
@@ -170,6 +171,12 @@ func getMediaResults(inputUrl string, args map[string]string) ([]Media, string, 
 
 // returns the ID of the file, and error message, and an error
 func downloadMedia(url string, requestArgs map[string]string) (string, string, error) {
+	cookieFile, cookieErr := configuredCookieFile(requestArgs)
+	if cookieErr != nil {
+		message := "Unable to access cookies.txt in MR_COOKIES_DIR. Check the file and directory permissions."
+		return "", message, errors.New(message)
+	}
+
 	// The id will be used as the name of the parent directory of the output files
 	id := GetMD5Hash(url, requestArgs)
 	name := getMediaDirectory(id) + "%(id)s.%(ext)s"
@@ -219,6 +226,9 @@ func downloadMedia(url string, requestArgs map[string]string) (string, string, e
 	}
 
 	args = append(args, url)
+	if cookieFile != "" {
+		args = append([]string{"--cookies", cookieFile}, args...)
+	}
 
 	cmd := exec.Command("yt-dlp", args...)
 
@@ -227,8 +237,12 @@ func downloadMedia(url string, requestArgs map[string]string) (string, string, e
 	stderrIn, _ := cmd.StderrPipe()
 
 	var errStdout, errStderr error
-	stdout := io.MultiWriter(os.Stdout, &stdoutBuf)
-	stderr := io.MultiWriter(os.Stderr, &stderrBuf)
+	var stdout io.Writer = io.MultiWriter(os.Stdout, &stdoutBuf)
+	var stderr io.Writer = io.MultiWriter(os.Stderr, &stderrBuf)
+	if cookieFile != "" {
+		// Downloader diagnostics can contain cookie values, especially for malformed files.
+		stdout, stderr = io.Discard, io.Discard
+	}
 
 	err := cmd.Start()
 	if err != nil {
@@ -250,6 +264,10 @@ func downloadMedia(url string, requestArgs map[string]string) (string, string, e
 	err = cmd.Wait()
 	if err != nil {
 		log.Error().Err(err).Msgf("cmd.Run() failed with %s", err)
+		if cookieFile != "" {
+			message := "Download failed with cookies. Check that cookies.txt is writable and contains a valid, fresh cookie export, or remove it to retry without cookies."
+			return "", message, errors.New(message)
+		}
 		return "", strings.TrimSpace(stderrBuf.String()), err
 	} else if errStdout != nil {
 		log.Error().Msgf("failed to capture stdout: %v", errStdout)

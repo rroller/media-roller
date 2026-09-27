@@ -3,3 +3,5 @@ download/
 .DS_Store
 media-roller
 bin/
+cookies/
+*cookies*.txt

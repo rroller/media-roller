@@ -1,1 +1,5 @@
 downloads/
+cookies/
+**/cookies/
+*cookies*.txt
+**/*cookies*.txt

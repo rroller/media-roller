@@ -3,6 +3,7 @@ package media
 import (
 	"html/template"
 	"media-roller/src/utils"
+	"media-roller/templates"
 	"net/http"
 	"regexp"
 	"strings"
@@ -11,7 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var aboutIndexTmpl = template.Must(template.ParseFiles("templates/media/about.html"))
+var aboutIndexTmpl = template.Must(template.ParseFS(templates.Files, "media/about.html"))
 
 var newlineRegex = regexp.MustCompile("\r?\n")
 
