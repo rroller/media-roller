@@ -102,6 +102,17 @@ func TestDownloadUsesConfiguredCookies(t *testing.T) {
 	}
 }
 
+func TestGetUrlIncludesPreset(t *testing.T) {
+	r := httptest.NewRequest(http.MethodGet, "/api/download?preset=ios&url=https://example.com/video", nil)
+	url, args := getUrl(r)
+	if url != "https://example.com/video" {
+		t.Fatalf("unexpected url: %q", url)
+	}
+	if args["preset"] != "ios" {
+		t.Fatalf("expected preset=ios, got %q", args["preset"])
+	}
+}
+
 func TestIndexHasNoCookieUpload(t *testing.T) {
 	t.Setenv("MR_MEDIA_LIST_ENABLED", "false")
 	w := httptest.NewRecorder()

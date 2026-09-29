@@ -77,6 +77,15 @@ To download a video directly, use the API endpoint:
 /api/download?url=SOME_URL
 ```
 
+For iOS Photos-compatible output, add `preset=ios`:
+
+```
+/api/download?preset=ios&url=SOME_URL
+```
+
+The iOS preset returns an MP4 encoded with H.264 video and AAC audio so the
+Shortcuts app can save downloaded videos directly to Photos.
+
 Create a bookmarklet, allowing one click downloads (From a PC):
 
 ```
@@ -86,7 +95,7 @@ javascript:(location.href="http://127.0.0.1:3000/fetch?url="+encodeURIComponent(
 # Integrating with mobile
 After you have your server up, install this shortcut. Update the endpoint to your server address by editing the shortcut before running it. 
 
-https://www.icloud.com/shortcuts/d3b05b78eb434496ab28dd91e1c79615
+https://www.icloud.com/shortcuts/12d5ab16ee3b4aa48cccfcb305ca03e4
 
 # Unraid
 media-roller is available in Unraid and can be found on the "Apps" tab by searching its name.

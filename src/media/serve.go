@@ -64,9 +64,12 @@ func streamFileToClient(w http.ResponseWriter, r *http.Request, filename string)
 	// Get content type of file
 	fileContentType := http.DetectContentType(fileHeader)
 
-	// Send the headers
-	w.Header().Set("Content-Disposition", "filename="+filepath.Base(filename))
+	// Send the headers. iOS Shortcuts is picky about downloaded media blobs:
+	// a quoted attachment filename helps it infer a real .mp4 file for Photos.
+	baseName := filepath.Base(filename)
+	w.Header().Set("Content-Disposition", "attachment; filename=\""+baseName+"\"")
 	w.Header().Set("Content-Type", fileContentType)
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 
 	log.Info().Msgf("Opening file for streaming %s", filename)
 

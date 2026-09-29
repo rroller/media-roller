@@ -122,6 +122,9 @@ func getUrl(r *http.Request) (string, map[string]string) {
 
 	// Support yt-dlp arguments passed in via the url. We'll assume anything starting with a dash - is an argument
 	args := make(map[string]string)
+	if preset := strings.TrimSpace(r.URL.Query().Get("preset")); preset != "" {
+		args["preset"] = preset
+	}
 	for k, v := range r.URL.Query() {
 		if strings.HasPrefix(k, "-") {
 			if len(v) > 0 {
@@ -176,6 +179,8 @@ func downloadMedia(url string, requestArgs map[string]string) (string, string, e
 		message := "Unable to access cookies.txt in MR_COOKIES_DIR. Check the file and directory permissions."
 		return "", message, errors.New(message)
 	}
+	preset := strings.ToLower(strings.TrimSpace(requestArgs["preset"]))
+	iosPreset := preset == "ios"
 
 	// The id will be used as the name of the parent directory of the output files
 	id := GetMD5Hash(url, requestArgs)
@@ -194,6 +199,9 @@ func downloadMedia(url string, requestArgs map[string]string) (string, string, e
 		"--verbose":             "",
 		"--output":              name,
 	}
+	if iosPreset {
+		defaultArgs["--format"] = "bv*[vcodec^=avc1][ext=mp4]+ba[acodec^=mp4a]/b[ext=mp4][vcodec^=avc1]/best[ext=mp4]/best"
+	}
 
 	args := make([]string, 0)
 
@@ -209,6 +217,9 @@ func downloadMedia(url string, requestArgs map[string]string) (string, string, e
 
 	// Now add all request level arguments
 	for arg, value := range requestArgs {
+		if arg == "preset" {
+			continue
+		}
 		args = append(args, arg)
 		if value != "" {
 			args = append(args, value)
@@ -274,8 +285,38 @@ func downloadMedia(url string, requestArgs map[string]string) (string, string, e
 	} else if errStderr != nil {
 		log.Error().Msgf("failed to capture stderr: %v", errStderr)
 	}
+	if iosPreset {
+		if err := ensureIosCompatible(id); err != nil {
+			message := "Downloaded media could not be converted to iOS-compatible H.264/AAC MP4."
+			log.Error().Err(err).Msg(message)
+			return "", message, err
+		}
+	}
 
 	return id, "", nil
+}
+
+func ensureIosCompatible(id string) error {
+	files, err := getAllFilesForId(id)
+	if err != nil {
+		return err
+	}
+	for _, media := range files {
+		input := getMediaDirectory(id) + media.Name
+		tmp := input + ".ios.tmp.mp4"
+		cmd := exec.Command("ffmpeg", "-y", "-i", input, "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-movflags", "+faststart", tmp)
+		var stderrBuf bytes.Buffer
+		cmd.Stderr = &stderrBuf
+		if err := cmd.Run(); err != nil {
+			_ = os.Remove(tmp)
+			return fmt.Errorf("ffmpeg iOS compatibility conversion failed: %w: %s", err, strings.TrimSpace(stderrBuf.String()))
+		}
+		if err := os.Rename(tmp, input); err != nil {
+			_ = os.Remove(tmp)
+			return err
+		}
+	}
+	return nil
 }
 
 // Returns the relative directory containing the media file, with a trailing slash.
