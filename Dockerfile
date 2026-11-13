@@ -41,8 +41,8 @@ RUN pip install curl_cffi --upgrade --pre
 RUN pip install -U yt-dlp-ejs
 
 # Get new releases here https://github.com/yt-dlp/yt-dlp/releases
-RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/download/2026.03.17/yt-dlp -o /usr/local/bin/yt-dlp && \
-    echo "3bda0968a01cde70d26720653003b28553c71be14dcb2e5f4c24e9921fdad745 /usr/local/bin/yt-dlp" | sha256sum -c - && \
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/download/2026.10.26/yt-dlp -o /usr/local/bin/yt-dlp && \
+    echo "e51e69e89489f199530f13d32a4342da3ddb2cf34842f364603a066db05afbf3 /usr/local/bin/yt-dlp" | sha256sum -c - && \
     chmod a+rx /usr/local/bin/yt-dlp
 
 RUN yt-dlp --update --update-to nightly
