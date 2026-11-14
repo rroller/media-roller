@@ -70,6 +70,21 @@ from Git and Docker build contexts.
 Existing explicit yt-dlp options such as `--cookies`, `--no-cookies`, and
 `--cookies-from-browser` take precedence over the configured file.
 
+# Daily dependency updates
+
+The **Daily dependency updates** GitHub Actions workflow runs daily at 10:23 UTC
+and can also be started manually from the Actions tab. It opens or refreshes a
+single PR with stable Go and yt-dlp releases, Go module upgrades, and the newest
+Alpine image variants available for the pinned Go and Python versions on both
+amd64 and arm64. Python and FFmpeg version upgrades remain manual.
+
+Before opening the PR, it verifies the yt-dlp checksum, runs the Go tests and
+application build, and builds both container platforms without publishing.
+Updates are merged through normal PR review. The workflow requires the repository
+setting **Actions → General → Workflow permissions → Allow GitHub Actions to
+create and approve pull requests**. Its schedule becomes active after the workflow
+is merged into the default branch.
+
 # API
 To download a video directly, use the API endpoint:
 
