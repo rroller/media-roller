@@ -1,0 +1,96 @@
+name: Daily dependency updates
+
+on:
+  schedule:
+    - cron: '23 10 * * *' # Daily at 10:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: daily-dependency-updates
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GOTOOLCHAIN: local
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Resolve latest stable Go, yt-dlp, and Alpine images
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 -m unittest discover -s scripts -p 'test_*.py'
+          python3 scripts/update_dependencies.py
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      - name: Upgrade Go dependencies
+        run: |
+          go get -u ./...
+          go mod tidy
+
+      - name: Detect updates
+        id: changes
+        run: |
+          if git diff --quiet -- Dockerfile go.mod go.sum .tool-versions; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Test and build
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          go test ./...
+          go build -o "$RUNNER_TEMP/media-roller" ./src
+          git diff --check
+
+      - uses: docker/setup-qemu-action@v3
+        if: steps.changes.outputs.changed == 'true'
+        with:
+          platforms: arm64
+
+      - uses: docker/setup-buildx-action@v3
+        if: steps.changes.outputs.changed == 'true'
+
+      - name: Validate both container platforms
+        if: steps.changes.outputs.changed == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: false
+          cache-from: type=gha,scope=dependency-updates
+          cache-to: type=gha,mode=max,scope=dependency-updates
+
+      - name: Open or refresh dependency PR
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: automation/daily-dependencies
+          delete-branch: true
+          commit-message: Update Go, yt-dlp, Go modules, and Alpine
+          title: Update Go, yt-dlp, Go modules, and Alpine
+          body: |
+            Daily updates to the latest stable Go and yt-dlp releases, available
+            Go module upgrades, and the latest Alpine variants published for
+            the pinned Go and Python versions on amd64 and arm64.
+
+            The yt-dlp download checksum was verified against the release checksum file.
+            Go tests, the application build, and both container platform builds passed.
+            The existing yt-dlp nightly auto-update behavior is preserved.
+          add-paths: |
+            Dockerfile
+            go.mod
+            go.sum
+            .tool-versions
